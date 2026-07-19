@@ -684,12 +684,65 @@
             animate(info.target, { opacity: 1, transform: "translateY(0)" }, { duration: 0.7, easing: [0.215, 0.610, 0.355, 1.000] });
         });
 
+        // Certificates grid staggered entry
         inView("#cert-grid", () => {
-            animate("#cert-grid .cert-item", { opacity: [0, 1], transform: ["translateY(40px)", "translateY(0px)"] }, {
-                delay: stagger(0.15),
+            animate("#cert-grid .cert-item", { opacity: [0, 1], transform: ["translateY(40px)", "translateY(0px)"], scale: [0.98, 1] }, {
+                delay: stagger(0.12),
                 duration: 0.6
             });
         });
+
+        // Bento skill cards animated on scroll with a gentle stagger
+        inView(".bento-skills", () => {
+            animate(".bento-skills .bento-card", { opacity: [0,1], transform: ["translateY(20px)", "translateY(0)"], scale: [0.99,1] }, {
+                delay: stagger(0.10),
+                duration: 0.55,
+                easing: "ease-out"
+            });
+        });
+
+        // Animate each cert-item as it individually comes into view (for precise entrance)
+        inView(".cert-item", (info) => {
+            animate(info.target, { opacity: [0,1], transform: ["translateY(30px)", "translateY(0)"], scale: [0.995,1] }, { duration: 0.5 });
+        });
+
+        // Small hover pop for cert items using Motion for nicer micro-interaction
+        document.querySelectorAll('.cert-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                animate(item, { scale: 1.02 }, { duration: 0.18 });
+            });
+            item.addEventListener('mouseleave', () => {
+                animate(item, { scale: 1 }, { duration: 0.18 });
+            });
+        });
+
+        // Smooth nav click scrolling with header offset
+        (function setupNavSmoothScroll(){
+            const header = document.querySelector('header');
+            const headerOffset = header ? header.offsetHeight + 12 : 80;
+            const navLinks = document.querySelectorAll('header nav a[href^="#"]');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const href = link.getAttribute('href');
+                    if (!href || href === '#') return;
+                    const target = document.querySelector(href);
+                    e.preventDefault();
+
+                    const targetY = target ? window.pageYOffset + target.getBoundingClientRect().top - headerOffset : 0;
+
+                    // Use native smooth scroll for robustness
+                    window.scrollTo({ top: Math.max(0, Math.round(targetY)), behavior: 'smooth' });
+
+                    // Update the URL hash without causing an immediate jump
+                    if (history.pushState) {
+                        history.pushState(null, '', href);
+                    } else {
+                        location.hash = href;
+                    }
+                });
+            });
+        })();
     </script>
 </body>
 </html>
